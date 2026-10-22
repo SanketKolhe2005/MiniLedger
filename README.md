@@ -1,30 +1,33 @@
 # MiniLedger — Personal Lending Tracker
 
-MiniLedger is a simple application that helps users track money lent to friends, monitor repayments, and identify overdue loans. It includes a React Native application built with Expo and a Node.js backend connected to PostgreSQL.
+MiniLedger is a full-stack application for tracking money lent to friends. It helps users record loans, monitor repayments, identify overdue payments, and view a summary of their lending activity.
+
+The project includes a TypeScript backend connected to PostgreSQL and a React Native frontend built with Expo.
 
 ## Features
 
-- **Phone OTP Login:** Mock OTP authentication for demonstration purposes.
+- **Mock Phone OTP Login:** Demonstration login using an OTP printed in the backend terminal.
 - **Add Loans:** Record a friend's name, loan amount, and due date.
-- **Loan Tracking:** View loans and their repayment status.
-- **Repayment Management:** Mark pending loans as repaid.
-- **Summary Dashboard:** View total lent, total repaid, and overdue amounts.
-- **Overdue Highlighting:** Identify unpaid loans whose due dates have passed.
+- **Loan List:** View recorded loans and their repayment status.
+- **Repayment Tracking:** Mark a loan as repaid.
+- **Summary Dashboard:** Display total lent, total repaid, and overdue amounts.
+- **Overdue Identification:** Highlight unpaid loans past their due date.
 
 ## Technology Stack
 
-**Frontend**
+### Frontend
 - React Native
 - Expo
 - TypeScript
+- Expo Router
 
-**Backend**
+### Backend
 - Node.js
 - Express.js
 - TypeScript
 - PostgreSQL
-- `pg` PostgreSQL client
-- `dotenv` for environment configuration
+- PostgreSQL `pg` client
+- `dotenv`
 
 ## Project Structure
 
@@ -32,50 +35,59 @@ MiniLedger is a simple application that helps users track money lent to friends,
 MiniLedger/
 ├── backend/
 │   ├── src/
-│   │   ├── server.ts
-│   │   └── db.ts
+│   │   ├── db.ts
+│   │   └── server.ts
 │   ├── package.json
 │   ├── package-lock.json
-│   └── .env.example
+│   └── tsconfig.json
 ├── mobile/
 │   ├── src/
-│   │   └── app/
+│   │   ├── app/
+│   │   ├── components/
+│   │   ├── constants/
+│   │   ├── hooks/
+│   │   └── global.css
 │   ├── assets/
+│   ├── scripts/
 │   ├── app.json
+│   ├── expo-env.d.ts
 │   ├── package.json
-│   └── package-lock.json
+│   ├── package-lock.json
+│   └── tsconfig.json
 ├── .gitignore
 └── README.md
 ```
 
 ## Prerequisites
 
-Install the following before running the application:
+Install the following:
 
 - Node.js and npm
 - PostgreSQL
+- Git (optional for running locally)
 - Visual Studio Code (recommended)
 
 ## Database Setup
 
-1. Start PostgreSQL.
+1. Start your local PostgreSQL server.
 2. Create a database named `miniledger`.
-3. Open the database in pgAdmin and execute the SQL statements that create the `friends` and `loans` tables.
+3. Open the `miniledger` database in pgAdmin.
+4. Create the `friends` and `loans` tables.
 
-The `loans` table references the `friends` table. Create `friends` first.
+The `friends` table must be created before the `loans` table because each loan references a friend.
 
 ## Backend Setup
 
-Open a terminal and navigate to the backend folder:
+Open a terminal in the project directory and run:
 
 ```bash
 cd backend
 npm install
 ```
 
-Create a `.env` file inside `backend/` using `.env.example` as a template. Set the database credentials for your local PostgreSQL installation.
+Create a `.env` file inside the `backend` folder. Use `.env.example` as a template if it is available.
 
-Example configuration:
+Example environment configuration:
 
 ```dotenv
 PORT=5000
@@ -86,7 +98,7 @@ DB_USER=postgres
 DB_PASSWORD=your_local_postgres_password
 ```
 
-Replace the example password with your actual local PostgreSQL password. Never commit `.env` to GitHub.
+Replace the example password with your local PostgreSQL password. Never upload your actual `.env` file to GitHub.
 
 Start the backend:
 
@@ -94,26 +106,30 @@ Start the backend:
 npx tsx src/server.ts
 ```
 
-The API should run at:
+The backend should run at:
 
 `http://localhost:5000`
 
+Keep the backend terminal open while using the application.
+
 ## API Endpoints
 
-| Method | Endpoint | Description |
+| Method | Endpoint | Purpose |
 |---|---|---|
-| GET | `/` | Check that the API is running |
-| GET | `/api/health/db` | Check the database connection |
+| GET | `/` | Check whether the API is running |
+| GET | `/api/health/db` | Check the PostgreSQL connection |
 | POST | `/api/auth/send-otp` | Generate a mock OTP |
-| POST | `/api/auth/verify-otp` | Verify the mock OTP |
+| POST | `/api/auth/verify-otp` | Verify a mock OTP |
 | GET | `/api/loans` | Retrieve loans |
 | POST | `/api/loans` | Create a loan |
 | PATCH | `/api/loans/:id/repay` | Mark a loan as repaid |
 | GET | `/api/summary` | Retrieve lending summary totals |
 
-### Add Loan Request Example
+These endpoints reflect the API routes implemented in the project.
 
-`POST /api/loans`
+### Example: Create a Loan
+
+Request: `POST /api/loans`
 
 ```json
 {
@@ -123,9 +139,9 @@ The API should run at:
 }
 ```
 
-### Summary Response Example
+### Example: Summary Response
 
-`GET /api/summary`
+Request: `GET /api/summary`
 
 ```json
 {
@@ -135,11 +151,11 @@ The API should run at:
 }
 ```
 
-The values depend on the loans currently stored in the database.
+The returned values depend on the data in the database and the due dates of pending loans.
 
 ## Frontend Setup
 
-Open a second terminal:
+Open a second terminal in the project directory:
 
 ```bash
 cd mobile
@@ -147,35 +163,38 @@ npm install
 npx expo start
 ```
 
-To run the application in a browser, use the web option provided by Expo or run:
+To run the application in a browser, use the web option in Expo or run:
 
 ```bash
 npx expo start --web
 ```
 
-For a physical phone, configure the frontend API URL to use your computer's local network IP address instead of `localhost`. Ensure both devices are on the same network and that the backend is reachable.
+For a physical phone, configure the frontend API URL to use your computer's local network IP address rather than `localhost`. Ensure the phone and computer can communicate over the same network.
 
-## Mock OTP Authentication
+## Mock OTP Login
 
-This project uses a mock OTP for demonstration purposes. The generated OTP is printed in the backend terminal. Enter that OTP in the app to test the login flow.
+The application uses a mock OTP flow for demonstration purposes. The backend prints the generated OTP in its terminal. Use that OTP to test the login screen.
 
-**Note:** This is a demonstration implementation, not production-grade authentication.
+This is a development-only authentication flow and is not intended for production use.
 
 ## Testing
 
+The following checks can be performed:
+
 1. Start PostgreSQL and verify the database connection.
-2. Start the backend and check `/api/health/db`.
-3. Test adding a loan.
-4. Verify the summary totals.
-5. Mark a loan as repaid and verify the updated totals.
-6. Test the login screen and dashboard in the frontend.
+2. Start the backend and check the database health endpoint.
+3. Add a test loan and confirm it appears in the application.
+4. Verify that the dashboard totals update.
+5. Mark a pending loan as repaid and confirm the repayment status.
+6. Test the mock OTP login flow.
+7. Check overdue highlighting using an unpaid loan with a past due date.
 
-## Security Notes
+## Security
 
-- Do not upload `.env`, passwords, or private credentials.
-- Do not upload `node_modules/` or generated build files.
-- Use mock OTP authentication for demonstration only.
-- Configure real authentication, authorization, and appropriate security controls before production use.
+- Keep `.env` and all database passwords private.
+- Exclude `node_modules/`, `.expo/`, and generated build files from the repository.
+- Use mock OTP only for demonstration.
+- Add appropriate authentication, authorization, and validation before production deployment.
 
 ## Author
 
